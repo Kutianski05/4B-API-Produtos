@@ -11,6 +11,10 @@ class ProdutoTest extends TestCase
     /**
      * A basic feature test example.
      */
+
+    use RefreshDatabase; // Faltou essa trait na aula -> serve pra utilizar e dar refresh na memória temporária do sqlite
+
+
     public function test_cria_produto_com_sucesso(): void
     {
         $this->postJson('/api/produtos', [
