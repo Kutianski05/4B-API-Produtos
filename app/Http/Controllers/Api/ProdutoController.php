@@ -10,24 +10,25 @@ use Illuminate\Http\Request;
 
 class ProdutoController extends Controller
 {
-
     public function __construct(private ProdutoService $service) {}
 
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request)
     {
+        $request->validate([
+            'search' => 'nullable|string',
+            'preco_max' => 'nullable|numeric|min:0',
+            'em_estoque' => 'nullable|boolean',
+        ]);
+
         $filtros = [
             'search' => $request->query('search'),
+            'preco_max' => $request->query('preco_max'),
+            'em_estoque' => $request->has('em_estoque') ? $request->boolean('em_estoque') : null,
         ];
 
         return ProdutoResource::collection($this->service->listar($filtros));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $dados = $request->validate([
@@ -38,24 +39,16 @@ class ProdutoController extends Controller
             'quantidade' => 'sometimes|integer|min:0',
         ]);
 
-        // Cria o Produto (Model)
         $produto = $this->service->create($dados);
 
-        // Retorna um novo Recurso a cada requisição
         return new ProdutoResource($produto);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Produto $produto)
     {
         return new ProdutoResource($produto);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Produto $produto)
     {
         $dados = $request->validate([
@@ -66,16 +59,15 @@ class ProdutoController extends Controller
             'quantidade' => 'sometimes|integer|min:0',
         ]);
 
-        $produto->update($dados);
+        $produto = $this->service->atualizar($produto, $dados);
 
         return new ProdutoResource($produto);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function destroy(Produto $produto)
     {
-        //
+        $this->service->remover($produto);
+
+        return response()->noContent();
     }
 }

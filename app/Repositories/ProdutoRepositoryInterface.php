@@ -3,7 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\Produto;
-use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 interface ProdutoRepositoryInterface
 {
@@ -14,5 +14,4 @@ interface ProdutoRepositoryInterface
     public function delete(Produto $produto): void;
 
     public function search(array $filtros = [], int $porPagina = 10): LengthAwarePaginator;
-
 }

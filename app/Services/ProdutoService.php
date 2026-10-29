@@ -8,7 +8,9 @@ use Illuminate\Validation\ValidationException;
 
 class ProdutoService
 {
-    public function __construct(private ProdutoRepositoryInterface $produtos) {}
+    public function __construct(private ProdutoRepositoryInterface $produtos)
+    {
+    }
 
     public function create(array $dados)
     {
@@ -22,12 +24,29 @@ class ProdutoService
         return $this->produtos->search($filtros);
     }
 
+    public function atualizar(Produto $produto, array $dados)
+    {
+        if (isset($dados['preco']) || isset($dados['preco_custo'])) {
+            $this->verificarMargem(
+                $dados['preco'] ?? $produto->preco,
+                $dados['preco_custo'] ?? $produto->preco_custo
+            );
+        }
+
+        return $this->produtos->update($produto, $dados);
+    }
+
+    public function remover(Produto $produto): void
+    {
+        $this->produtos->delete($produto);
+    }
+
     private function verificarMargem(float $preco, float $custo)
     {
         $valor = $custo + (0.1 * $custo);
         $preco_minimo = round($valor, 2);
 
-        if($preco < $preco_minimo){
+        if ($preco < $preco_minimo) {
             throw ValidationException::withMessages([
                 'preco' => sprintf('O preço deve ser mais do que 10 por cento do valor de custo: %.2f', $preco_minimo),
             ]);
